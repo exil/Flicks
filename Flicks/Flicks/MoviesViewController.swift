@@ -12,6 +12,7 @@ import AFNetworking
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
+    @IBOutlet var errorView: UIView!
     @IBOutlet var tableView: UITableView!
     var movies: [NSDictionary]?
     
@@ -40,6 +41,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                             
                             self.tableView.reloadData()
                     }
+                } else {
+                    self.errorView.hidden = false
                 }
         });
         task.resume()
