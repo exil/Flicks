@@ -10,11 +10,14 @@ import UIKit
 import AFNetworking
 import EZLoadingActivity
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating {
     
     @IBOutlet var errorView: UIView!
     @IBOutlet var tableView: UITableView!
     var movies: [NSDictionary]?
+    var endpoint: String!
+    var filteredMovies: [NSDictionary]?
+    var searchController: UISearchController!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,7 +28,17 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         tableView.dataSource = self
         tableView.delegate = self
-
+        
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        
+        searchController.dimsBackgroundDuringPresentation = false
+        
+        searchController.searchBar.sizeToFit()
+        tableView.tableHeaderView = searchController.searchBar
+        
+        definesPresentationContext = true
+        
         getMovies()
     }
 
@@ -37,7 +50,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     func getMovies(callback: (() -> Void)? = nil) {
         // Do any additional setup after loading the view.
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
@@ -46,6 +59,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         )
         
         EZLoadingActivity.show("Loading...", disableUI: true)
+        self.errorView.hidden = true
         
         let task : NSURLSessionDataTask = session.dataTaskWithRequest(request,
             completionHandler: { (dataOrNil, response, error) in
@@ -55,7 +69,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
                         self.movies = responseDictionary["results"] as? [NSDictionary]
-                        print(responseDictionary)
+                        self.filteredMovies = self.movies
                         self.tableView.reloadData()
                     }
                 } else {
@@ -76,8 +90,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let movies = movies {
-            return movies.count
+        if let filteredMovies = filteredMovies {
+            return filteredMovies.count
         }
         
         return 0
@@ -86,13 +100,15 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
         
-        let movie = movies![indexPath.row]
+        let movie = filteredMovies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
         let baseUrl = "http://image.tmdb.org/t/p/w500/"
         
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
+        
+        cell.overviewLabel.sizeToFit()
         
         if let posterPath = movie["poster_path"] as? String {
             let posterUrl = NSURL(string: baseUrl + posterPath)
@@ -101,6 +117,21 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         return cell
     }
+    
+    func updateSearchResultsForSearchController(searchController: UISearchController) {
+        print(searchController.searchBar.text)
+        if let searchText = searchController.searchBar.text {
+            filteredMovies = searchText.isEmpty ? movies : movies!.filter({
+                if let title = $0["title"] as? String {
+                    return title.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil
+                }
+                
+                return false
+            })
+            
+            tableView.reloadData()
+        }
+    }
 
     // MARK: - Navigation
 
@@ -108,7 +139,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         let cell = sender as! UITableViewCell
         let indexPath = tableView.indexPathForCell(cell)
-        let movie = movies![indexPath!.row]
+        let movie = filteredMovies![indexPath!.row]
         
         let detailViewController = segue.destinationViewController as! DetailViewController
         
