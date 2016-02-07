@@ -110,12 +110,22 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         cell.overviewLabel.sizeToFit()
         
+        cell.selectionStyle = .None
+        
         if let posterPath = movie["poster_path"] as? String {
             let posterUrl = NSURL(string: baseUrl + posterPath)
             cell.posterView.setImageWithURL(posterUrl!)
         }
         
         return cell
+    }
+    
+    func tableView(tableView: UITableView, didHighlightRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.cellForRowAtIndexPath(indexPath)!.backgroundColor = UIColor.greenColor()
+    }
+    
+    func tableView(tableView: UITableView, didUnhighlightRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.cellForRowAtIndexPath(indexPath)!.backgroundColor = .None
     }
     
     func updateSearchResultsForSearchController(searchController: UISearchController) {
