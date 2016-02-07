@@ -16,7 +16,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet var tableView: UITableView!
     @IBOutlet var collectionView: UICollectionView!
     @IBOutlet var viewControl: UISegmentedControl!
-    @IBOutlet var searchPlaceholder: UIView!
+    //@IBOutlet var searchPlaceholder: UIView!
 
     var movies: [NSDictionary]?
     var endpoint: String!
@@ -33,7 +33,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl, atIndex: 0)
-        collectionView.insertSubview(refreshControl, atIndex: 0)
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -49,7 +48,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         searchController.searchBar.sizeToFit()
         
-        searchPlaceholder.addSubview(searchController.searchBar)
+        //searchPlaceholder.addSubview(searchController.searchBar)
         tableView.tableHeaderView = searchController.searchBar
         
         searchController.searchBar.barTintColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 1.0)
@@ -274,7 +273,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             })
             
             tableView.reloadData()
-            collectionView.reloadData()
+            //collectionView.reloadData()
         }
     }
 
