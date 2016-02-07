@@ -37,6 +37,18 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         searchController.searchBar.sizeToFit()
         tableView.tableHeaderView = searchController.searchBar
         
+        searchController.searchBar.barTintColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 1.0)
+        
+        if let navigationBar = navigationController?.navigationBar {
+            navigationBar.barTintColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 1.0)
+            navigationBar.tintColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            
+            navigationBar.titleTextAttributes = [
+                NSFontAttributeName : UIFont.boldSystemFontOfSize(22),
+                NSForegroundColorAttributeName : UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            ]
+        }
+        
         definesPresentationContext = true
         
         getMovies()
@@ -121,7 +133,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func tableView(tableView: UITableView, didHighlightRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.cellForRowAtIndexPath(indexPath)!.backgroundColor = UIColor.greenColor()
+        tableView.cellForRowAtIndexPath(indexPath)!.backgroundColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 0.5)
     }
     
     func tableView(tableView: UITableView, didUnhighlightRowAtIndexPath indexPath: NSIndexPath) {
