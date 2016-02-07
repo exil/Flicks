@@ -2,7 +2,7 @@
 
 Flicks is a movies app using the [The Movie Database API](http://docs.themoviedb.apiary.io/#).
 
-Time spent: **X** hours spent in total
+Time spent: **8** hours spent in total
 
 ## User Stories
 
@@ -17,7 +17,7 @@ The following **required** functionality is completed:
 The following **optional** features are implemented:
 
 - [x] Add a tab bar for **Now Playing** and **Top Rated** movies.
-- [ ] Implement segmented control to switch between list view and grid view.
+- [x] Implement segmented control to switch between list view and grid view.
 - [x] Add a search bar.
 - [x] All images fade in.
 - [x] For the large poster, load the low-res image first, switch to high-res when complete.
@@ -32,12 +32,17 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
+![Video Walkthrough](flicks.gif)
+
+(The beginning starts off with Wi-Fi off. Right before I pull to refresh, I turn Wi-Fi back on.)
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
 Describe any challenges encountered while building the app.
+
+- I'm still trying to get the search bar controller to show up on the collection view, which is why there's a space at the top in grid mode.
 
 ## License
 
