@@ -31,6 +31,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
+        searchController.searchBar.hidden = true
         
         searchController.dimsBackgroundDuringPresentation = false
         
@@ -38,6 +39,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.tableHeaderView = searchController.searchBar
         
         searchController.searchBar.barTintColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 1.0)
+        searchController.searchBar.tintColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         
         if let navigationBar = navigationController?.navigationBar {
             navigationBar.barTintColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 1.0)
@@ -78,6 +80,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                 EZLoadingActivity.hide()
                 
                 if let data = dataOrNil {
+                    self.searchController.searchBar.hidden = false
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
                         self.movies = responseDictionary["results"] as? [NSDictionary]
@@ -115,7 +118,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let movie = filteredMovies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
-        let baseUrl = "http://image.tmdb.org/t/p/w500/"
+        let baseUrl = "http://image.tmdb.org/t/p/"
+        let lowResPath = "w45/"
+        let highResPath = "original/"
         
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
@@ -125,8 +130,41 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         cell.selectionStyle = .None
         
         if let posterPath = movie["poster_path"] as? String {
-            let posterUrl = NSURL(string: baseUrl + posterPath)
-            cell.posterView.setImageWithURL(posterUrl!)
+            let posterLowResRequest = NSURLRequest(URL: NSURL(string: baseUrl + lowResPath + posterPath)!)
+            let posterHighResRequest = NSURLRequest(URL: NSURL(string: baseUrl + highResPath + posterPath)!)
+            
+            cell.posterView.setImageWithURLRequest(
+                posterLowResRequest,
+                placeholderImage: nil,
+                success: { (posterLowResRequest, posterLowResResponse, posterLowResImage) -> Void in
+                    cell.posterView.alpha = 0.0
+                    cell.posterView.image = posterLowResImage
+                    
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                            cell.posterView.alpha = 1.0
+                        }, completion: { (success) -> Void in
+                            
+                            cell.posterView.setImageWithURLRequest(posterHighResRequest,
+                                placeholderImage: posterLowResImage,
+                                success: { (posterHighResRequest, posterHighResResponse, posterHighResImage) -> Void in
+                                    cell.posterView.image = posterHighResImage
+                                },
+                                failure: { (request, response, error) -> Void in
+                                }
+                            )
+                        })
+                },
+                failure: { (request, response, error) -> Void in
+                    cell.posterView.setImageWithURLRequest(posterHighResRequest,
+                        placeholderImage: nil,
+                        success: { (posterHighResRequest, posterHighResResponse, posterHighResImage) -> Void in
+                            cell.posterView.image = posterHighResImage
+                        },
+                        failure: { (request, response, error) -> Void in
+                        }
+                    )
+                }
+            )
         }
         
         return cell
