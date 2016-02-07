@@ -10,14 +10,22 @@ import UIKit
 import AFNetworking
 import EZLoadingActivity
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UISearchResultsUpdating {
     
     @IBOutlet var errorView: UIView!
     @IBOutlet var tableView: UITableView!
+    @IBOutlet var collectionView: UICollectionView!
+    @IBOutlet var viewControl: UISegmentedControl!
+    @IBOutlet var searchPlaceholder: UIView!
+
     var movies: [NSDictionary]?
     var endpoint: String!
     var filteredMovies: [NSDictionary]?
     var searchController: UISearchController!
+    
+    enum Mode: Int {
+        case List = 0, Grid
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,9 +33,13 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl, atIndex: 0)
+        collectionView.insertSubview(refreshControl, atIndex: 0)
         
         tableView.dataSource = self
         tableView.delegate = self
+        
+        collectionView.dataSource = self
+        collectionView.delegate = self
         
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
@@ -36,6 +48,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         searchController.dimsBackgroundDuringPresentation = false
         
         searchController.searchBar.sizeToFit()
+        
+        searchPlaceholder.addSubview(searchController.searchBar)
         tableView.tableHeaderView = searchController.searchBar
         
         searchController.searchBar.barTintColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 1.0)
@@ -86,6 +100,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                         self.movies = responseDictionary["results"] as? [NSDictionary]
                         self.filteredMovies = self.movies
                         self.tableView.reloadData()
+                        self.collectionView.reloadData()
                     }
                 } else {
                     self.errorView.hidden = false
@@ -102,6 +117,19 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         getMovies({
             refreshControl.endRefreshing()
         })
+    }
+    
+    @IBAction func viewTypeChanged(sender: AnyObject) {
+        let viewType = viewControl.selectedSegmentIndex
+        
+        
+        if viewType == 0 {
+            tableView.hidden = false
+            collectionView.hidden = true
+        } else if viewType == 1 {
+            tableView.hidden = true
+            collectionView.hidden = false
+        }
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -170,6 +198,63 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         return cell
     }
     
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if let filteredMovies = filteredMovies {
+            return filteredMovies.count
+        }
+        
+        return 0
+    }
+    
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("gridViewCell", forIndexPath: indexPath) as! MovieGridViewCell
+        
+        let movie = filteredMovies![indexPath.row]
+        let baseUrl = "http://image.tmdb.org/t/p/"
+        let lowResPath = "w45/"
+        let highResPath = "original/"
+        
+        if let posterPath = movie["poster_path"] as? String {
+            let posterLowResRequest = NSURLRequest(URL: NSURL(string: baseUrl + lowResPath + posterPath)!)
+            let posterHighResRequest = NSURLRequest(URL: NSURL(string: baseUrl + highResPath + posterPath)!)
+            
+            cell.posterView.setImageWithURLRequest(
+                posterLowResRequest,
+                placeholderImage: nil,
+                success: { (posterLowResRequest, posterLowResResponse, posterLowResImage) -> Void in
+                    cell.posterView.alpha = 0.0
+                    cell.posterView.image = posterLowResImage
+                    
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                        cell.posterView.alpha = 1.0
+                        }, completion: { (success) -> Void in
+                            
+                            cell.posterView.setImageWithURLRequest(posterHighResRequest,
+                                placeholderImage: posterLowResImage,
+                                success: { (posterHighResRequest, posterHighResResponse, posterHighResImage) -> Void in
+                                    cell.posterView.image = posterHighResImage
+                                },
+                                failure: { (request, response, error) -> Void in
+                                }
+                            )
+                    })
+                },
+                failure: { (request, response, error) -> Void in
+                    cell.posterView.setImageWithURLRequest(posterHighResRequest,
+                        placeholderImage: nil,
+                        success: { (posterHighResRequest, posterHighResResponse, posterHighResImage) -> Void in
+                            cell.posterView.image = posterHighResImage
+                        },
+                        failure: { (request, response, error) -> Void in
+                        }
+                    )
+                }
+            )
+        }
+        
+        return cell
+    }
+    
     func tableView(tableView: UITableView, didHighlightRowAtIndexPath indexPath: NSIndexPath) {
         tableView.cellForRowAtIndexPath(indexPath)!.backgroundColor = UIColor(red: 0.73, green: 0, blue: 0, alpha: 0.5)
     }
@@ -179,7 +264,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func updateSearchResultsForSearchController(searchController: UISearchController) {
-        print(searchController.searchBar.text)
         if let searchText = searchController.searchBar.text {
             filteredMovies = searchText.isEmpty ? movies : movies!.filter({
                 if let title = $0["title"] as? String {
@@ -190,6 +274,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             })
             
             tableView.reloadData()
+            collectionView.reloadData()
         }
     }
 
@@ -197,8 +282,14 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        let cell = sender as! UITableViewCell
-        let indexPath = tableView.indexPathForCell(cell)
+        let cell = sender
+        var indexPath: NSIndexPath?
+        
+        if viewControl.selectedSegmentIndex == Mode.List.rawValue {
+            indexPath = tableView.indexPathForCell(cell as! UITableViewCell)
+        } else {
+            indexPath = collectionView.indexPathForCell(cell as! UICollectionViewCell)
+        }
         let movie = filteredMovies![indexPath!.row]
         
         let detailViewController = segue.destinationViewController as! DetailViewController

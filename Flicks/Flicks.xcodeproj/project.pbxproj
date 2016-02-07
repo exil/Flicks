@@ -14,6 +14,7 @@
 		502E98DB1C61EBB6000B2D23 /* MoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502E98DA1C61EBB6000B2D23 /* MoviesViewController.swift */; };
 		502E98DE1C64623F000B2D23 /* MovieCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502E98DD1C64623F000B2D23 /* MovieCell.swift */; };
 		502E98E11C646E51000B2D23 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502E98E01C646E51000B2D23 /* DetailViewController.swift */; };
+		50D785E81C67CBC400E8754B /* MovieGridViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50D785E71C67CBC400E8754B /* MovieGridViewCell.swift */; };
 		FB202A83E1EB039A4E420A0F /* Pods_Flicks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 128A1610EF78257254F22AB6 /* Pods_Flicks.framework */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +30,7 @@
 		502E98DA1C61EBB6000B2D23 /* MoviesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoviesViewController.swift; sourceTree = "<group>"; };
 		502E98DD1C64623F000B2D23 /* MovieCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieCell.swift; sourceTree = "<group>"; };
 		502E98E01C646E51000B2D23 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		50D785E71C67CBC400E8754B /* MovieGridViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieGridViewCell.swift; sourceTree = "<group>"; };
 		FDCA52D1C3B224F23F415D34 /* Pods-Flicks.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Flicks.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Flicks/Pods-Flicks.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -80,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				502E98DD1C64623F000B2D23 /* MovieCell.swift */,
+				50D785E71C67CBC400E8754B /* MovieGridViewCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -235,6 +238,7 @@
 				502E98C91C61E911000B2D23 /* AppDelegate.swift in Sources */,
 				502E98DB1C61EBB6000B2D23 /* MoviesViewController.swift in Sources */,
 				502E98DE1C64623F000B2D23 /* MovieCell.swift in Sources */,
+				50D785E81C67CBC400E8754B /* MovieGridViewCell.swift in Sources */,
 				502E98E11C646E51000B2D23 /* DetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
